@@ -5,14 +5,13 @@ import (
 	"biogo/v2/ui"
 	"fmt"
 	"log"
-	"math/rand"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
+	//rand.Seed(time.Now().UnixNano())
 
 	sim := simulation.New()
 	for i := 0; i < 50*simulation.Params.MaxAge; i++ {
@@ -25,7 +24,6 @@ func main() {
 	}
 
 	game := ui.NewGame(sim)
-
 	ebiten.SetWindowSize(simulation.Params.GridWidth*2, simulation.Params.GridHeight*2)
 	ebiten.SetWindowTitle("Genetic Simulation")
 
