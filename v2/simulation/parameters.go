@@ -13,7 +13,7 @@ var Params = &Parameters{
 	MinStartNeuronCount:             2,
 	MaxStartNeuronCount:             20,
 	MinNeuronCount:                  1,  // > 1 | Note: This doesn't necessarily reflect the true NNet as useless neurons are culled.
-	MaxNeuronCount:                  20, // < whatever the comuter accepts
+	MaxNeuronCount:                  20, // < whatever the computer accepts
 	MinHiddenLayerCount:             2,  // > 0 | Note: This doesn't necessarily reflect the true NNet as useless neurons are culled.
 	MaxHiddenLayerCount:             8,  // < MaxNeuronCount
 	MinSightDistance:                2,
@@ -23,7 +23,7 @@ var Params = &Parameters{
 	SexualReproductionSimilarityMin: 0.9,
 	SexualReproductionSimilarityMax: 0.98,
 	ResponseCurveKFactor:            2,
-	Challenge:                       FarLeftSurvive,
+	Challenge:                       MiddleWall,
 }
 
 type Parameters struct {

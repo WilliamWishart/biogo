@@ -21,6 +21,8 @@ type Creature struct {
 	Genome         *Genome
 }
 
+// NewCreature creates a new Creature with the given id, location, and genome.
+// It initializes the Creature's properties and returns a pointer to the created Creature.
 func NewCreature(id int, loc grid.Coord, g *Genome) *Creature {
 	c := Creature{
 		Id:             id,
