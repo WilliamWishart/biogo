@@ -12,6 +12,21 @@ import (
 	"golang.org/x/image/font/opentype"
 )
 
+// BlockSize determines the size of each grid block in pixels.
+const BlockSize = 2
+
+// StatLineXOffset is the horizontal offset for stat lines from the right edge.
+const StatLineXOffset = 200
+
+// StatLineYSpacing is the vertical spacing between stat lines.
+const StatLineYSpacing = 20
+
+// StatLineYBase is the base Y offset for stat lines.
+const StatLineYBase = 3
+
+// CenterLineWidth is the width of the center line in grid units.
+const CenterLineWidth = 5
+
 type Game struct {
 	Simulation *simulation.Simulation
 	Grid       *Grid
@@ -19,8 +34,6 @@ type Game struct {
 	lastGeneration int
 	fontFace       font.Face // Add fontFace to reuse
 }
-
-var BlockSize int = 2
 
 func NewGame(sim *simulation.Simulation) *Game {
 	// Parse font and create font face once
@@ -53,10 +66,9 @@ func NewGame(sim *simulation.Simulation) *Game {
 		img.Translate(float64(creature.Loc.X*int(BlockSize)), float64(creature.Loc.Y*int(BlockSize)))
 	}
 
-	width := 5
 	center := g.Simulation.Grid.SizeX() / 2
-	minX := center - width/2
-	maxX := center + width/2
+	minX := center - CenterLineWidth/2
+	maxX := center + CenterLineWidth/2
 	minY := g.Simulation.Grid.SizeY() / 4
 	maxY := minY + g.Simulation.Grid.SizeY()/2
 	g.Grid.AddLine(float64(minX*BlockSize), float64(minY*BlockSize), float64(maxX*BlockSize), float64(maxY*BlockSize))
@@ -100,5 +112,12 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func (g *Game) AddStatLine(img *ebiten.Image, description string, statLine int, count int) {
-	text.Draw(img, fmt.Sprintf("%s: %d", description, statLine), g.fontFace, g.Simulation.Grid.SizeX()*BlockSize-200, 20*count+3, color.White)
+	text.Draw(
+		img,
+		fmt.Sprintf("%s: %d", description, statLine),
+		g.fontFace,
+		g.Simulation.Grid.SizeX()*BlockSize-StatLineXOffset,
+		StatLineYSpacing*count+StatLineYBase,
+		color.White,
+	)
 }
