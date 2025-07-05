@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
+	"runtime/pprof"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -13,6 +15,16 @@ import (
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
+
+	// Start CPU profiling
+	f, err := os.Create("cpu.prof")
+	if err != nil {
+		log.Fatal("could not create CPU profile: ", err)
+	}
+	if err := pprof.StartCPUProfile(f); err != nil {
+		log.Fatal("could not start CPU profile: ", err)
+	}
+	defer pprof.StopCPUProfile()
 
 	sim := simulation.New()
 	for i := 0; i < 10*simulation.Params.MaxAge; i++ {

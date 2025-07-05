@@ -4,29 +4,30 @@ package jaro
 // JaroSimilarity return a similarity index (between 0 and 1)
 // It use Jaro distance algorithm and allow only transposition operation
 func JaroSimilarity(str1, str2 string) float32 {
-	// Convert string parameters to rune arrays to be compatible with non-ASCII
-	runeStr1 := []rune(str1)
-	runeStr2 := []rune(str2)
-
-	// Get and store length of these strings
-	runeStr1len := len(runeStr1)
-	runeStr2len := len(runeStr2)
-	if runeStr1len == 0 || runeStr2len == 0 {
+	if len(str1) == 0 || len(str2) == 0 {
 		return 0.0
-	} else if Equal(runeStr1, runeStr2) {
+	}
+	if str1 == str2 {
+		if len(str1) == 0 {
+			return 0.0
+		}
 		return 1.0
 	}
 
-	var match int
-	// Maximum matching distance allowed
-	maxDist := Max(runeStr1len, runeStr2len)/2 - 1
-	// Correspondence tables (1 for matching and 0 if it's not the case)
-	str1Table := make([]int, runeStr1len)
-	str2Table := make([]int, runeStr2len)
+	runeStr1 := []rune(str1)
+	runeStr2 := []rune(str2)
+	runeStr1len := len(runeStr1)
+	runeStr2len := len(runeStr2)
 
-	// Check for matching characters in both strings
+	maxDist := Max(runeStr1len, runeStr2len)/2 - 1
+	str1Table := make([]int8, runeStr1len)
+	str2Table := make([]int8, runeStr2len)
+	match := 0
+
 	for i := 0; i < runeStr1len; i++ {
-		for j := Max(0, i-maxDist); j < Min(runeStr2len, i+maxDist+1); j++ {
+		start := Max(0, i-maxDist)
+		end := Min(runeStr2len, i+maxDist+1)
+		for j := start; j < end; j++ {
 			if runeStr1[i] == runeStr2[j] && str2Table[j] == 0 {
 				str1Table[i] = 1
 				str2Table[j] = 1
@@ -39,9 +40,8 @@ func JaroSimilarity(str1, str2 string) float32 {
 		return 0.0
 	}
 
-	var t float32
-	var p int
-	// Check for possible translations
+	t := 0
+	p := 0
 	for i := 0; i < runeStr1len; i++ {
 		if str1Table[i] == 1 {
 			for str2Table[p] == 0 {
@@ -55,9 +55,8 @@ func JaroSimilarity(str1, str2 string) float32 {
 	}
 	t /= 2
 
-	return (float32(match)/float32(runeStr1len) +
-		float32(match)/float32(runeStr2len) +
-		(float32(match)-t)/float32(match)) / 3.0
+	m := float32(match)
+	return (m/float32(runeStr1len) + m/float32(runeStr2len) + (m-float32(t))/m) / 3.0
 }
 
 // JaroWinklerSimilarity return a similarity index (between 0 and 1)
