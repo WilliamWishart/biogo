@@ -203,3 +203,18 @@ func (g Grid) DensityAxis(loc Coord, radius float32, lastMoveDir Dir, fn func(g 
 	}
 	return sum / maxSumMag
 }
+
+// Helper: Returns a shuffled list of all empty locations in the grid
+func (g *Grid) ShuffledEmptyLocations() []Coord {
+	var empty []Coord
+	for x := 0; x < g.SizeX(); x++ {
+		for y := 0; y < g.SizeY(); y++ {
+			coord := Coord{X: x, Y: y}
+			if g.IsEmptyAt(coord) {
+				empty = append(empty, coord)
+			}
+		}
+	}
+	rand.Shuffle(len(empty), func(i, j int) { empty[i], empty[j] = empty[j], empty[i] })
+	return empty
+}

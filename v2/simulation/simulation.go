@@ -32,8 +32,12 @@ func (s *Simulation) InitializeGrid() {
 
 func (s *Simulation) InitializeFirstGeneration() {
 	pop := NewPopulation()
+	emptyLocs := s.Grid.ShuffledEmptyLocations()
+	if len(emptyLocs) < Params.StartingPopulation {
+		panic("Not enough empty locations for starting population")
+	}
 	for i := grid.RESERVED_CELL_TYPES; i < Params.StartingPopulation+grid.RESERVED_CELL_TYPES; i++ {
-		loc := s.Grid.FindEmptyLocation()
+		loc := emptyLocs[i-grid.RESERVED_CELL_TYPES]
 		pop.Creatures[i-grid.RESERVED_CELL_TYPES] = NewCreature(i, loc, MakeRandomGenome())
 		s.Grid.Set(loc, i)
 	}
@@ -70,8 +74,12 @@ func (s *Simulation) InitializeNewGeneration() {
 	fmt.Printf("Generation: %d\t%.2f%% Survived\n", s.Generation, survivalPercentage)
 
 	children := []*Creature{}
+	emptyLocs := s.Grid.ShuffledEmptyLocations()
+	if len(emptyLocs) < Params.MaxPopulation {
+		panic("Not enough empty locations for new generation")
+	}
 	for i := grid.RESERVED_CELL_TYPES; i < Params.MaxPopulation+grid.RESERVED_CELL_TYPES; i++ {
-		loc := s.Grid.FindEmptyLocation()
+		loc := emptyLocs[i-grid.RESERVED_CELL_TYPES]
 		child := NewCreature(i-grid.RESERVED_CELL_TYPES, loc, childrenGenomes[(i-grid.RESERVED_CELL_TYPES)%len(childrenGenomes)])
 		children = append(children, child)
 		s.Grid.Set(loc, i)
