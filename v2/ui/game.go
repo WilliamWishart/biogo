@@ -15,7 +15,6 @@ import (
 type Game struct {
 	Simulation *simulation.Simulation
 	Grid       *Grid
-	statLine   *StatLine
 
 	lastGeneration int
 	fontFace       font.Face // Add fontFace to reuse
