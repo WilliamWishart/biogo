@@ -35,11 +35,12 @@ type Game struct {
 	fontFace       font.Face // Add fontFace to reuse
 }
 
-func NewGame(sim *simulation.Simulation) *Game {
-	// Parse font and create font face once
+// NewGame creates a new Game instance and initializes the font face.
+// Returns an error if font parsing or face creation fails.
+func NewGame(sim *simulation.Simulation) (*Game, error) {
 	tt, err := opentype.Parse(fonts.MPlus1pRegular_ttf)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to parse font: %w", err)
 	}
 	face, err := opentype.NewFace(tt, &opentype.FaceOptions{
 		Size:    16,
@@ -47,7 +48,7 @@ func NewGame(sim *simulation.Simulation) *Game {
 		Hinting: font.HintingFull,
 	})
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to create font face: %w", err)
 	}
 	g := Game{
 		Simulation: sim,
@@ -72,7 +73,7 @@ func NewGame(sim *simulation.Simulation) *Game {
 	minY := g.Simulation.Grid.SizeY() / 4
 	maxY := minY + g.Simulation.Grid.SizeY()/2
 	g.Grid.AddLine(float64(minX*BlockSize), float64(minY*BlockSize), float64(maxX*BlockSize), float64(maxY*BlockSize))
-	return &g
+	return &g, nil
 }
 
 func (g *Game) Update() error {
