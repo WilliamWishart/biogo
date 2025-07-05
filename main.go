@@ -12,7 +12,9 @@ import (
 )
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
+	seed := time.Now().UnixNano()
+	r := rand.New(rand.NewSource(seed))
+	_ = r // Use r for random numbers instead of global rand
 
 	sim := simulation.New()
 	for i := 0; i < 50*simulation.Params.MaxAge; i++ {
