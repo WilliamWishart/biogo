@@ -15,7 +15,7 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	sim := simulation.New()
-	for i := 0; i < 50*simulation.Params.MaxAge; i++ {
+	for i := 0; i < 10*simulation.Params.MaxAge; i++ {
 		start := time.Now()
 		sim.Update()
 		end := time.Now()

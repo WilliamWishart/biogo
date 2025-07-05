@@ -112,7 +112,7 @@ func (c Creature) GetSensor(sensorID byte, g *grid.Grid, p *Population, simStep 
 		if g.IsInBounds(newLoc) && g.IsOccupiedAt(newLoc) {
 			otherCreatureId := g.Data[newLoc.X][newLoc.Y]
 			if otherCreatureId-grid.RESERVED_CELL_TYPES < 0 || otherCreatureId-grid.RESERVED_CELL_TYPES > len(p.Creatures) {
-				fmt.Println("\nError: %d with %d reserved\n", otherCreatureId, grid.RESERVED_CELL_TYPES)
+				fmt.Printf("\nError: %d with %d reserved\n", otherCreatureId, grid.RESERVED_CELL_TYPES)
 			} else {
 				otherCreature := p.Creatures[otherCreatureId-grid.RESERVED_CELL_TYPES]
 				if otherCreature.Alive {
