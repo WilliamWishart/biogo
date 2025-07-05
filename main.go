@@ -24,11 +24,15 @@ func main() {
 		}
 	}
 
-	game := ui.NewGame(sim)
+	game, err := ui.NewGame(sim)
+	if err != nil {
+		log.Fatalf("failed to create game: %v", err)
+	}
+
 	ebiten.SetWindowSize(simulation.Params.GridWidth*2, simulation.Params.GridHeight*2)
 	ebiten.SetWindowTitle("Genetic Simulation")
 
 	if err := ebiten.RunGame(game); err != nil {
-		log.Fatal()
+		log.Fatal(err)
 	}
 }
