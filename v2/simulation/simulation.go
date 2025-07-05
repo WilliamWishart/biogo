@@ -2,7 +2,6 @@ package simulation
 
 import (
 	"biogo/v2/grid"
-	"biogo/v2/utils"
 	"fmt"
 	"math"
 	"math/rand"
@@ -119,111 +118,23 @@ func (s *Simulation) Print() {
 }
 
 func (s *Simulation) ExecuteActions(c *Creature, actionLevels []float32) {
+	s.handleResponsiveness(c, actionLevels)
+	s.handleOscillatorPeriod(c, actionLevels)
 
-	if IsActionEnabled(SET_RESPONSIVENESS) {
-		responsivenessLevel := actionLevels[SET_RESPONSIVENESS]
-		responsivenessLevel = (float32(math.Tanh(float64(responsivenessLevel/float32(utils.ClampByteAsFloat32(0, 1, c.Genome.Responsiveness))))) + 1) / 2
-		c.Responsiveness = responsivenessLevel
-	}
-
-	// Adjust action levels based on responsiveness
 	responseAdjust := responseCurve(c.Responsiveness)
+	moveX, moveY := s.handleMovement(c, actionLevels, responseAdjust)
 
-	if IsActionEnabled(SET_OSCILLATOR_PERIOD) {
-		periodf := actionLevels[SET_OSCILLATOR_PERIOD]
-		newPeriodf := float32(math.Tanh(float64(periodf)+1) / 2)
-		newPeriod := 1 + int(1.5+math.Exp(7*float64(newPeriodf)))
-		if newPeriod >= 2 && newPeriod <= math.MaxUint8 {
-			c.Clock = newPeriod
-		}
-	}
-
-	moveX := float32(0)
-	moveY := float32(0)
-	if IsActionEnabled(MOVE_X) {
-		moveX = actionLevels[MOVE_X]
-	}
-
-	if IsActionEnabled(MOVE_Y) {
-		moveX = actionLevels[MOVE_Y]
-	}
-
-	if IsActionEnabled(MOVE_EAST) {
-		moveX += actionLevels[MOVE_EAST]
-	}
-
-	if IsActionEnabled(MOVE_WEST) {
-		moveX -= actionLevels[MOVE_WEST]
-	}
-
-	if IsActionEnabled(MOVE_NORTH) {
-		moveY += actionLevels[MOVE_NORTH]
-	}
-
-	if IsActionEnabled(MOVE_SOUTH) {
-		moveY += actionLevels[MOVE_SOUTH]
-	}
-
-	if IsActionEnabled(MOVE_FWD) {
-		level := actionLevels[MOVE_FWD]
-		moveX += float32(c.LastMoveDir.X) * level
-		moveY += float32(c.LastMoveDir.Y) * level
-	}
-
-	if IsActionEnabled(MOVE_LEFT) {
-		level := actionLevels[MOVE_LEFT]
-		offset := c.LastMoveDir.Rotate90CCW()
-		moveX += float32(offset.X) * level
-		moveY += float32(offset.Y) * level
-	}
-
-	if IsActionEnabled(MOVE_RIGHT) {
-		level := actionLevels[MOVE_RIGHT]
-		offset := c.LastMoveDir.Rotate90CW()
-		moveX += float32(offset.X) * level
-		moveY += float32(offset.Y) * level
-	}
-
-	if IsActionEnabled(MOVE_RL) {
-		level := actionLevels[MOVE_RL]
-		offset := grid.CENTER
-		if level < 0 {
-			offset = c.LastMoveDir.Rotate90CCW()
-		} else if level < 0 {
-			offset = c.LastMoveDir.Rotate90CW()
-		}
-		moveX += float32(offset.X) * level
-		moveY += float32(offset.Y) * level
-	}
-
-	if IsActionEnabled(MOVE_RANDOM) {
-		level := actionLevels[MOVE_RANDOM]
-		offset := grid.RandomDir()
-		moveX += float32(offset.X) * level
-		moveY += float32(offset.Y) * level
-	}
-
-	moveX = float32(math.Tanh(float64(moveX)))
-	moveY = float32(math.Tanh(float64(moveY)))
-	moveX *= responseAdjust
-	moveY *= responseAdjust
-	moveXSign := 1
-	moveYSign := 1
+	moveXSign, moveYSign := 1, 1
 	if moveX < 0 {
 		moveXSign = -1
-	} else {
-		moveXSign = 1
 	}
 	if moveY < 0 {
 		moveYSign = -1
-	} else {
-		moveYSign = 1
 	}
 
 	moveXBool := prob2Bool(math.Abs(float64(moveX)))
 	moveYBool := prob2Bool(math.Abs(float64(moveY)))
 	movementOffset := grid.Dir{X: moveXBool * moveXSign, Y: moveYBool * moveYSign}
-	// Move if it's a valid location
 	newCoord := c.GetNextLoc(movementOffset)
 	if s.Grid.IsInBounds(newCoord) && s.Grid.IsEmptyAt(newCoord) {
 		s.Population.QueueForMove(c, newCoord)
