@@ -1,4 +1,4 @@
-//https://github.com/hbollon/go-edlib/blob/master/jaro.go
+// https://github.com/hbollon/go-edlib/blob/master/jaro.go
 package jaro
 
 // JaroSimilarity return a similarity index (between 0 and 1)

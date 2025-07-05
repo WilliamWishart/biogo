@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"runtime"
 	"runtime/pprof"
 	"time"
 
@@ -25,6 +26,17 @@ func main() {
 		log.Fatal("could not start CPU profile: ", err)
 	}
 	defer pprof.StopCPUProfile()
+
+	// Start memory profiling
+	mf, err := os.Create("mem.prof")
+	if err != nil {
+		log.Fatal("could not create memory profile: ", err)
+	}
+	defer func() {
+		runtime.GC() // get up-to-date statistics
+		pprof.WriteHeapProfile(mf)
+		mf.Close()
+	}()
 
 	sim := simulation.New()
 	for i := 0; i < 10*simulation.Params.MaxAge; i++ {

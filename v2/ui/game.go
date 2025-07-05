@@ -18,7 +18,26 @@ type Game struct {
 	statLine   *StatLine
 }
 
-var BlockSize int = 2
+var (
+	BlockSize int = 2
+
+	statFont font.Face
+)
+
+func init() {
+	tt, err := opentype.Parse(fonts.MPlus1pRegular_ttf)
+	if err != nil {
+		panic(err)
+	}
+	statFont, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    16,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	})
+	if err != nil {
+		panic(err)
+	}
+}
 
 func NewGame(sim *simulation.Simulation) *Game {
 	g := Game{
@@ -83,11 +102,5 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func (g *Game) AddStatLine(img *ebiten.Image, description string, statLine int, count int) {
-	tt, _ := opentype.Parse(fonts.MPlus1pRegular_ttf)
-	font, _ := opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    16,
-		DPI:     72,
-		Hinting: font.HintingFull,
-	})
-	text.Draw(img, fmt.Sprintf("%s: %d", description, statLine), font, g.Simulation.Grid.SizeX()*BlockSize-200, 20*count+3, color.White)
+	text.Draw(img, fmt.Sprintf("%s: %d", description, statLine), statFont, g.Simulation.Grid.SizeX()*BlockSize-200, 20*count+3, color.White)
 }
