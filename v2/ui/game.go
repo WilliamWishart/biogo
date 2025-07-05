@@ -18,14 +18,29 @@ type Game struct {
 	statLine   *StatLine
 
 	lastGeneration int
+	fontFace       font.Face // Add fontFace to reuse
 }
 
 var BlockSize int = 2
 
 func NewGame(sim *simulation.Simulation) *Game {
+	// Parse font and create font face once
+	tt, err := opentype.Parse(fonts.MPlus1pRegular_ttf)
+	if err != nil {
+		panic(err)
+	}
+	face, err := opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    16,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	})
+	if err != nil {
+		panic(err)
+	}
 	g := Game{
 		Simulation: sim,
 		Grid:       NewGrid(0, 0, BlockSize),
+		fontFace:   face,
 	}
 	for _, creature := range g.Simulation.Population.Creatures {
 		red, green, blue, alpha := creature.Genome.ToColor()
@@ -86,11 +101,5 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func (g *Game) AddStatLine(img *ebiten.Image, description string, statLine int, count int) {
-	tt, _ := opentype.Parse(fonts.MPlus1pRegular_ttf)
-	font, _ := opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    16,
-		DPI:     72,
-		Hinting: font.HintingFull,
-	})
-	text.Draw(img, fmt.Sprintf("%s: %d", description, statLine), font, g.Simulation.Grid.SizeX()*BlockSize-200, 20*count+3, color.White)
+	text.Draw(img, fmt.Sprintf("%s: %d", description, statLine), g.fontFace, g.Simulation.Grid.SizeX()*BlockSize-200, 20*count+3, color.White)
 }
