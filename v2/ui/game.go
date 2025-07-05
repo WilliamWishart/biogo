@@ -16,6 +16,8 @@ type Game struct {
 	Simulation *simulation.Simulation
 	Grid       *Grid
 	statLine   *StatLine
+
+	lastGeneration int
 }
 
 var BlockSize int = 2
@@ -48,9 +50,9 @@ func NewGame(sim *simulation.Simulation) *Game {
 }
 
 func (g *Game) Update() error {
-	lastGeneration := g.Simulation.Generation
-	g.Simulation.Update()
-	if g.Simulation.Generation != lastGeneration {
+	// Simulation update should be handled outside the UI layer.
+	// This method now only updates the UI representation if the simulation state has changed.
+	if g.lastGeneration != g.Simulation.Generation {
 		g.Grid.blobs = []*Blob{}
 		for _, creature := range g.Simulation.Population.Creatures {
 			red, green, blue, alpha := creature.Genome.ToColor()
@@ -63,6 +65,7 @@ func (g *Game) Update() error {
 			img := g.Grid.AddBlob(BlockSize, c)
 			img.Translate(float64(creature.Loc.X*int(BlockSize)), float64(creature.Loc.Y*int(BlockSize)))
 		}
+		g.lastGeneration = g.Simulation.Generation
 	}
 	for i, creature := range g.Simulation.Population.Creatures {
 		img := g.Grid.blobs[i]
