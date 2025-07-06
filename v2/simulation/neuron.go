@@ -1,3 +1,5 @@
+// neuron.go: Contains neural network data structures, neuron/node management, and network construction/pruning logic.
+
 package simulation
 
 import "fmt"

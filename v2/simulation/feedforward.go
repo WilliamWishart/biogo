@@ -1,3 +1,5 @@
+// feedforward.go: Implements the FeedForward neural network evaluation for creatures, producing action levels from sensory input.
+
 package simulation
 
 import (

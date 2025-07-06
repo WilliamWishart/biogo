@@ -1,3 +1,5 @@
+// simulation.go: Main simulation lifecycle, including grid and population management, stepping, and action execution.
+
 package simulation
 
 import (

@@ -1,3 +1,5 @@
+// creature.go: Defines the Creature struct and related methods for simulation entities (creatures), including neural net creation and movement logic.
+
 package simulation
 
 import (

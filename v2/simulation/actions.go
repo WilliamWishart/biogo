@@ -1,3 +1,5 @@
+// actions.go: Contains logic for handling all simulation actions (movement, responsiveness, oscillator period, etc.) for creatures.
+
 package simulation
 
 // Action logic for Simulation.ExecuteActions split out for clarity and maintainability.
