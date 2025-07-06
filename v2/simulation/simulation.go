@@ -117,6 +117,7 @@ func (s *Simulation) Print() {
 	fmt.Printf("Population Size: %d", len(s.Population.Creatures))
 }
 
+// ExecuteActions delegates all action-related logic to dedicated handlers for clarity and maintainability.
 func (s *Simulation) ExecuteActions(c *Creature, actionLevels []float32) {
 	s.handleResponsiveness(c, actionLevels)
 	s.handleOscillatorPeriod(c, actionLevels)
