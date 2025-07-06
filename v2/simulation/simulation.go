@@ -3,6 +3,7 @@ package simulation
 import (
 	"biogo/v2/grid"
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 )
@@ -26,10 +27,12 @@ func New() *Simulation {
 }
 
 func (s *Simulation) InitializeGrid() {
+	log.Println("Initializing grid...")
 	s.Grid = grid.NewGrid(Params.GridWidth, Params.GridHeight, 0)
 }
 
 func (s *Simulation) InitializeFirstGeneration() {
+	log.Println("Initializing first generation...")
 	pop := NewPopulation()
 	emptyLocs := s.Grid.ShuffledEmptyLocations()
 	if len(emptyLocs) < Params.StartingPopulation {
@@ -44,20 +47,25 @@ func (s *Simulation) InitializeFirstGeneration() {
 }
 
 func (s *Simulation) Update() {
+	log.Printf("Simulation update: Generation %d, Tick %d", s.Generation, s.Tick)
 	if s.Tick < Params.MaxAge {
 		s.Step()
 	} else {
+		log.Println("Max age reached, initializing new generation...")
 		s.InitializeNewGeneration()
 	}
 	if s.Generation >= Params.MaxGenerations {
+		log.Println("Simulation ended: reached max generations.")
 		panic("Simulation ended")
 	}
 }
 
 func (s *Simulation) InitializeNewGeneration() {
-	// s.GeneticDiversity = s.Population.GeneticDiversity()
+	log.Printf("Initializing new generation: %d", s.Generation+1)
+	s.GeneticDiversity = s.Population.GeneticDiversity()
 	s.Generation += 1
 	s.Tick = 0
+	log.Printf("Population before survival: %d", len(s.Population.Creatures))
 	childrenGenomes := []*Genome{}
 	for _, creature := range s.Population.Creatures {
 		if PassedSurvivalCriteria(creature, s) {
@@ -65,11 +73,14 @@ func (s *Simulation) InitializeNewGeneration() {
 			childrenGenomes = append(childrenGenomes, newGenome)
 		}
 	}
+	log.Printf("Children genomes after survival: %d", len(childrenGenomes))
 
 	if len(childrenGenomes) == 0 {
+		log.Println("All creatures have gone extinct.")
 		panic("The creatures have gone extinct.")
 	}
 	survivalPercentage := float64(len(childrenGenomes)) / float64(len(s.Population.Creatures)) * 100
+	log.Printf("Generation: %d\t%.2f%% Survived", s.Generation, survivalPercentage)
 	fmt.Printf("Generation: %d\t%.2f%% Survived\n", s.Generation, survivalPercentage)
 
 	children := []*Creature{}
@@ -82,18 +93,26 @@ func (s *Simulation) InitializeNewGeneration() {
 		child := NewCreature(i-grid.RESERVED_CELL_TYPES, loc, childrenGenomes[(i-grid.RESERVED_CELL_TYPES)%len(childrenGenomes)])
 		children = append(children, child)
 		s.Grid.Set(loc, i)
+		if (i-grid.RESERVED_CELL_TYPES)%100 == 0 { // Log every 100th child for progress
+			log.Printf("Created child %d at %v", i-grid.RESERVED_CELL_TYPES, loc)
+		}
 	}
+	log.Printf("Total children created: %d", len(children))
 
 	s.Population = &Population{
 		Creatures:  children,
 		DeathQueue: []DeathInstruction{},
 		MoveQueue:  []MoveInstruction{},
 	}
+	log.Println("Zero-filling grid...")
 	s.Grid.ZeroFill()
+	log.Println("Creating wall...")
 	s.Grid.CreateWall()
+	log.Println("New generation initialization complete.")
 }
 
 func (s *Simulation) Step() {
+	log.Printf("Simulation step: Generation %d, Tick %d", s.Generation, s.Tick)
 	for _, creature := range s.Population.Creatures {
 		if creature.Alive {
 			s.StepCreature(creature)
@@ -106,7 +125,15 @@ func (s *Simulation) Step() {
 	s.Tick++
 }
 
+// StepCreature advances the state of a single creature within the simulation by one step.
+// It logs the creature's ID and age, increments the creature's age, processes its neural
+// network to determine action levels, and then executes the resulting actions.
+//
+// Parameters:
+//
+//	c - Pointer to the Creature to be stepped.
 func (s *Simulation) StepCreature(c *Creature) {
+	log.Printf("Stepping creature ID %d, Age %d", c.Id, c.Age)
 	c.Age++
 	actionLevels := c.FeedForward(s.Grid, s.Population, s.Tick)
 	s.ExecuteActions(c, actionLevels)

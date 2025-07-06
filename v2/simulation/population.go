@@ -3,6 +3,7 @@ package simulation
 import (
 	"biogo/v2/grid"
 	"biogo/v2/utils"
+	"log"
 	"math/rand"
 )
 
@@ -56,12 +57,14 @@ func (p *Population) ProcessMoveQueue(g *grid.Grid) {
 // Random sample of population and compare genetics
 func (p *Population) GeneticDiversity() float32 {
 	if len(p.Creatures) < 2 {
+		log.Println("GeneticDiversity: Not enough creatures to compare.")
 		return 0
 	}
 
 	sampleSize := utils.Min(200, len(p.Creatures))
 	count := sampleSize
 	genomeSimilarityTotal := float32(0)
+	log.Printf("GeneticDiversity: Sampling %d pairs from %d creatures.", sampleSize, len(p.Creatures))
 	for count > 0 {
 		i1 := rand.Intn(len(p.Creatures))
 		i2 := rand.Intn(len(p.Creatures))
@@ -70,8 +73,14 @@ func (p *Population) GeneticDiversity() float32 {
 		}
 		c1 := p.Creatures[i1]
 		c2 := p.Creatures[i2]
-		genomeSimilarityTotal += 1 - GenomeSimilarity(*c1.Genome, *c2.Genome)
-		sampleSize--
+		div := 1 - GenomeSimilarity(*c1.Genome, *c2.Genome)
+		genomeSimilarityTotal += div
+		if count%50 == 0 {
+			log.Printf("Sample %d: c1=%d, c2=%d, diversity=%.4f", sampleSize-count+1, i1, i2, div)
+		}
+		count--
 	}
-	return genomeSimilarityTotal / float32(sampleSize)
+	result := genomeSimilarityTotal / float32(sampleSize)
+	log.Printf("GeneticDiversity: Result=%.4f", result)
+	return result
 }
