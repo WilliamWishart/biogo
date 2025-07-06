@@ -19,6 +19,9 @@ type Creature struct {
 	BirthLoc       grid.Coord
 	LastMoveDir    grid.Dir
 	Genome         *Genome
+
+	actionLevelsBuf       []float32
+	neuronAccumulatorsBuf []float32
 }
 
 func NewCreature(id int, loc grid.Coord, g *Genome) *Creature {
@@ -32,8 +35,7 @@ func NewCreature(id int, loc grid.Coord, g *Genome) *Creature {
 		Loc:            loc,
 		BirthLoc:       loc,
 		Responsiveness: float32(utils.ClampByteAsFloat32(0, 1, g.Responsiveness)) / 2,
-		// LastMoveDir: ,
-		Genome: g,
+		Genome:         g,
 	}
 	c.CreateNeuralNet()
 	return &c
@@ -42,6 +44,9 @@ func NewCreature(id int, loc grid.Coord, g *Genome) *Creature {
 // Takes a creature's genome and uses it to build a NeuralNetwork
 func (c *Creature) CreateNeuralNet() {
 	c.Nnet = *CreateNeuralNetworkFromGenome(c.Genome.Brain, c.Genome.NeuronCount)
+	// Preallocate buffers for FeedForward
+	c.actionLevelsBuf = make([]float32, ACTION_COUNT)
+	c.neuronAccumulatorsBuf = make([]float32, len(c.Nnet.HiddenNeurons))
 }
 
 func (c Creature) String() string {
